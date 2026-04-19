@@ -31,9 +31,9 @@ class MemberStatsController extends Controller
         // Calculer les statistiques
         $totalBiens = $biens->count();
         $biensDisponibles = $biens->where('statut', 'disponible')->count();
-        $biensLoues = $biens->where('statut', 'loué')->count();
-        $biensEnVente = $biens->whereHas('bienEnVente')->count();
-        $biensEnLocation = $biens->whereHas('bienEnLocation')->count();
+        $biensLoues = $biens->where('statut', 'loue')->count();
+        $biensEnVente = $biens->filter(fn($bien) => $bien->bienEnVente)->count();
+        $biensEnLocation = $biens->filter(fn($bien) => $bien->bienEnLocation)->count();
 
         // Calculer la valeur totale
         $valeurTotale = $biens->sum('prix');
@@ -69,7 +69,7 @@ class MemberStatsController extends Controller
         
         $biens = Bien::with(['tofs', 'options', 'bienEnLocation.locations'])
             ->where('user_id', $user->id)
-            ->where('statut', 'loué')
+            ->where('statut', 'loue')
             ->get();
 
         return response()->json([

@@ -12,14 +12,14 @@ class BienRequest extends FormRequest
     {
         return [
             'titre'      => 'required|string|max:255',
-            'surface'    => 'required|numeric|min:1',
+            'surface'    => 'nullable|numeric|min:1',
             'description'=> 'nullable|string',
-            'pieces'     => 'required|integer|min:1',
-            'chambres'   => 'required|integer|min:0',
+            'pieces'     => 'nullable|integer|min:1',
+            'chambres'   => 'nullable|integer|min:0',
             'etage'      => 'nullable|integer|min:0',
             'adresse'    => 'required|string|max:255',
             'ville'      => 'required|string|max:100',
-            'codePostal' => 'required|string|max:10',
+            'codePostal' => 'nullable|string|max:10',
             'statut'     => 'nullable|in:disponible,vendu,loue,reserve',
             'prix'       => 'required|numeric|min:0',
             'type_bien'  => 'nullable|in:vente,location',

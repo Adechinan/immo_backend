@@ -24,12 +24,12 @@ Route::post('/login',    [AuthController::class, 'login']);
 // --- Public ---
 Route::get('/biens',            [BienController::class, 'index']);
 Route::get('/biens/dernieres-annonces', [BienController::class, 'dernieresAnnonces']);
-Route::get('/biens/{bien}',     [BienController::class, 'show']);
-Route::get('/biens/{bien}/tofs',[TofController::class, 'index']);
+Route::get('/biens/{bien}',     [BienController::class, 'show'])->whereNumber('bien');
+Route::get('/biens/{bien}/tofs',[TofController::class, 'index'])->whereNumber('bien');
 Route::get('/options',          [OptionController::class, 'index']);
 
 // Demandes (envoi sans authentification)
-Route::post('/biens/{bien}/demandes', [DemandeController::class, 'store']);
+Route::post('/biens/{bien}/demandes', [DemandeController::class, 'store'])->whereNumber('bien');
 
 // --- Authentifié ---
 Route::middleware('auth:sanctum')->group(function () {
@@ -40,13 +40,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Biens (CRUD — admin/propriétaire)
     Route::post('/biens',              [BienController::class, 'store']);
-    Route::put('/biens/{bien}',        [BienController::class, 'update']);
-    Route::patch('/biens/{bien}',      [BienController::class, 'update']);
-    Route::delete('/biens/{bien}',     [BienController::class, 'destroy']);
+    Route::put('/biens/{bien}',        [BienController::class, 'update'])->whereNumber('bien');
+    Route::patch('/biens/{bien}',      [BienController::class, 'update'])->whereNumber('bien');
+    Route::delete('/biens/{bien}',     [BienController::class, 'destroy'])->whereNumber('bien');
 
     // Tofs
-    Route::post('/biens/{bien}/tofs',          [TofController::class, 'store']);
-    Route::delete('/biens/{bien}/tofs/{tof}',  [TofController::class, 'destroy']);
+    Route::post('/biens/{bien}/tofs',          [TofController::class, 'store'])->whereNumber('bien');
+    Route::delete('/biens/{bien}/tofs/{tof}',  [TofController::class, 'destroy'])->whereNumber('bien')->whereNumber('tof');
 
     // Options (admin)
     Route::post('/options',              [OptionController::class, 'store']);

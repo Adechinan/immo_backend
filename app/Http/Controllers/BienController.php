@@ -56,7 +56,10 @@ class BienController extends Controller
 
     public function store(BienRequest $request): JsonResponse
     {
-        $bien = Bien::create($request->validated());
+        $data = $request->validated();
+        $data['user_id'] = $request->user()->id;
+        
+        $bien = Bien::create($data);
 
         // Attacher les options si fournies
         if ($request->filled('options')) {
