@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('bien_en_location_id')->constrained('biens_en_location')->onDelete('cascade');
+            $table->foreignId('bien_id')->constrained('biens')->onDelete('cascade');
             $table->date('dateLocation');
             $table->timestamps();
         });

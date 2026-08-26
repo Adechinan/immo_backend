@@ -11,7 +11,10 @@ class DemandeResource extends JsonResource {
             'message_demandeur' => $this->message_demandeur,
             'email_demandeur'   => $this->email_demandeur,
             'contact_demandeur' => $this->contact_demandeur,
+            'reponse'           => $this->reponse,
+            'repondu_at'        => $this->repondu_at,
             'bien'              => new BienResource($this->whenLoaded('bien')),
+            'user'              => $this->whenLoaded('user', fn () => $this->user ? new UserResource($this->user) : null),
             'created_at'        => $this->created_at,
         ];
     }

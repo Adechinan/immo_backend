@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('adresse');
             $table->string('ville');
             $table->string('codePostal', 10)->nullable();
-            $table->enum('statut', ['disponible', 'vendu', 'loue', 'reserve'])->default('disponible');
+            $table->foreignId('statut_id')->constrained('statuts');
             $table->decimal('prix', 12, 2);
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();

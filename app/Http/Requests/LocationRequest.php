@@ -11,8 +11,8 @@ class LocationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'bien_en_location_id' => 'required|integer|exists:biens_en_location,id',
-            'dateLocation'        => 'nullable|date',
+            'bien_id'      => 'required|integer|exists:biens,id',
+            'dateLocation' => 'nullable|date',
         ];
     }
 }

@@ -8,8 +8,11 @@ class AchatResource extends JsonResource {
         return [
             'id'             => $this->id,
             'dateAchat'      => $this->dateAchat,
-            'user'           => new UserResource($this->whenLoaded('user')),
-            'bien_en_vente'  => $this->whenLoaded('bienEnVente'),
+            'user'           => $this->user ? new UserResource($this->user) : null,
+            'nom_manuel'     => $this->nom_manuel,
+            'email_manuel'   => $this->email_manuel,
+            'tel_manuel'     => $this->tel_manuel,
+            'bien'           => new BienResource($this->whenLoaded('bien')),
             'created_at'     => $this->created_at,
         ];
     }

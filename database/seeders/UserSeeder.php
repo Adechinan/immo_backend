@@ -15,47 +15,59 @@ class UserSeeder extends Seeder
     {
         // Créer un admin
         User::create([
-            'prenom' => 'Admin',
-            'nom' => 'System',
-            'tel' => '0123456789',
-            'email' => 'admin@immobilier.fr',
+            'prenom' => 'Aboki',
+            'nom' => 'GBETO',
+            // Format des numéros béninois depuis la renumérotation de 2021 :
+            // 10 chiffres, préfixe "01" suivi de l'ancien numéro à 8 chiffres
+            // (ex. réseau MTN Bénin : 01 97 xx xx xx).
+            'tel' => '0197001122',
+            'email' => 'aboki@gmail.com',
             'password' => Hash::make('password'),
             'type' => 'admin',
         ]);
 
-        // Créer des utilisateurs de test
+        // Créer des utilisateurs de test — noms et numéros représentatifs du
+        // Bénin (Cotonou, Abomey-Calavi, Porto-Novo...).
         $users = [
             [
-                'prenom' => 'Jean',
-                'nom' => 'Dupont',
-                'tel' => '0601020304',
-                'email' => 'jean.dupont@email.fr',
+                'prenom' => 'Kokou',
+                'nom' => 'Dossou',
+                'tel' => '0197234567',
+                'email' => 'kokou.dossou@email.bj',
                 'password' => Hash::make('password'),
                 'type' => 'user',
             ],
             [
-                'prenom' => 'Marie',
-                'nom' => 'Martin',
-                'tel' => '0605040302',
-                'email' => 'marie.martin@email.fr',
+                'prenom' => 'Rachidatou',
+                'nom' => 'Alassane',
+                'tel' => '0196345678',
+                'email' => 'rachidatou.alassane@email.bj',
                 'password' => Hash::make('password'),
                 'type' => 'user',
             ],
             [
-                'prenom' => 'Pierre',
-                'nom' => 'Durand',
-                'tel' => '0607080910',
-                'email' => 'pierre.durand@email.fr',
+                'prenom' => 'Fabrice',
+                'nom' => 'Houngbédji',
+                'tel' => '0161456789',
+                'email' => 'fabrice.houngbedji@email.bj',
                 'password' => Hash::make('password'),
                 'type' => 'user',
             ],
-             [
-                'prenom' => 'Aboki',
-                'nom' => 'GBETO',
-                'tel' =>   '0190180786',
-                'email' => 'aboki@gmail.com',
+            [
+                'prenom' => 'Falilatou',
+                'nom' => 'Chabi',
+                'tel' => '0162567890',
+                'email' => 'falilatou.chabi@email.bj',
                 'password' => Hash::make('password'),
-                'type' => 'admin',
+                'type' => 'user',
+            ],
+            [
+                'prenom' => 'Sègbédji',
+                'nom' => 'Agbodjan',
+                'tel' => '0190678901',
+                'email' => 'segbedji.agbodjan@email.bj',
+                'password' => Hash::make('password'),
+                'type' => 'user',
             ],
         ];
 

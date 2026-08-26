@@ -18,27 +18,27 @@ class MemberStatsController extends Controller
         $user = Auth::user();
         
         // Récupérer tous les biens de l'utilisateur
-        $biensQuery = Bien::with(['tofs', 'options', 'bienEnVente', 'bienEnLocation'])
+        $biensQuery = Bien::with(['tofs', 'options', 'statut', 'locations.user', 'achats.user'])
             ->where('user_id', $user->id);
 
         // Appliquer les filtres si fournis
         if ($request->filled('statut')) {
-            $biensQuery->where('statut', $request->statut);
+            $biensQuery->statutCode($request->statut);
         }
 
         $biens = $biensQuery->get();
 
         // Calculer les statistiques
         $totalBiens = $biens->count();
-        $biensDisponibles = $biens->where('statut', 'disponible')->count();
-        $biensLoues = $biens->where('statut', 'loue')->count();
-        $biensEnVente = $biens->filter(fn($bien) => $bien->bienEnVente)->count();
-        $biensEnLocation = $biens->filter(fn($bien) => $bien->bienEnLocation)->count();
+        $biensDisponibles = $biens->whereIn('statut.code', ['a_vendre', 'a_louer'])->count();
+        $biensLoues = $biens->where('statut.code', 'loue')->count();
+        $biensEnVente = $biens->whereIn('statut.code', ['a_vendre', 'vendu'])->count();
+        $biensEnLocation = $biens->whereIn('statut.code', ['a_louer', 'loue'])->count();
 
         // Calculer la valeur totale
         $valeurTotale = $biens->sum('prix');
-        $valeurVente = $biens->filter(fn($bien) => $bien->bienEnVente)->sum('prix');
-        $revenusMensuels = $biens->filter(fn($bien) => $bien->bienEnLocation)
+        $valeurVente = $biens->whereIn('statut.code', ['a_vendre', 'vendu'])->sum('prix');
+        $revenusMensuels = $biens->whereIn('statut.code', ['a_louer', 'loue'])
             ->sum('prix') / 12; // Estimation annuelle / 12
 
         // Taux d'occupation
@@ -67,9 +67,27 @@ class MemberStatsController extends Controller
     {
         $user = Auth::user();
         
-        $biens = Bien::with(['tofs', 'options', 'bienEnLocation.locations'])
+        $biens = Bien::with(['tofs', 'options', 'statut', 'locations.user', 'locations.mensualites'])
             ->where('user_id', $user->id)
-            ->where('statut', 'loue')
+            ->statutCode('loue')
+            ->get();
+
+        return response()->json([
+            'data' => BienResource::collection($biens),
+            'total' => $biens->count(),
+        ]);
+    }
+
+    /**
+     * Historique des biens vendus (avec l'acheteur)
+     */
+    public function biensVendus(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        $biens = Bien::with(['tofs', 'options', 'statut', 'achats.user'])
+            ->where('user_id', $user->id)
+            ->statutCode('vendu')
             ->get();
 
         return response()->json([
@@ -84,10 +102,10 @@ class MemberStatsController extends Controller
     public function biensEnVente(Request $request): JsonResponse
     {
         $user = Auth::user();
-        
-        $biens = Bien::with(['tofs', 'options', 'bienEnVente'])
+
+        $biens = Bien::with(['tofs', 'options', 'statut'])
             ->where('user_id', $user->id)
-            ->whereHas('bienEnVente')
+            ->enVente()
             ->get();
 
         return response()->json([
@@ -102,10 +120,10 @@ class MemberStatsController extends Controller
     public function biensEnLocation(Request $request): JsonResponse
     {
         $user = Auth::user();
-        
-        $biens = Bien::with(['tofs', 'options', 'bienEnLocation'])
+
+        $biens = Bien::with(['tofs', 'options', 'statut'])
             ->where('user_id', $user->id)
-            ->whereHas('bienEnLocation')
+            ->enLocation()
             ->get();
 
         return response()->json([
@@ -121,9 +139,9 @@ class MemberStatsController extends Controller
     {
         $user = Auth::user();
         
-        $biensEnLocation = Bien::with(['bienEnLocation.locations'])
+        $biensEnLocation = Bien::with(['locations', 'statut'])
             ->where('user_id', $user->id)
-            ->whereHas('bienEnLocation')
+            ->enLocation()
             ->get();
 
         $revenusMensuels = 0;
@@ -155,7 +173,7 @@ class MemberStatsController extends Controller
     {
         $user = Auth::user();
         
-        $biens = Bien::with(['tofs', 'options', 'bienEnVente.achats', 'bienEnLocation.locations'])
+        $biens = Bien::with(['achats.user', 'locations.user'])
             ->where('user_id', $user->id)
             ->get();
 
@@ -163,31 +181,37 @@ class MemberStatsController extends Controller
 
         // Transactions de vente
         foreach ($biens as $bien) {
-            if ($bien->bienEnVente && $bien->bienEnVente->achats) {
-                foreach ($bien->bienEnVente->achats as $achat) {
-                    $transactions[] = [
-                        'id' => $achat->id,
-                        'type' => 'vente',
-                        'bien_titre' => $bien->titre,
-                        'montant' => $achat->montant,
-                        'date' => $achat->created_at,
-                        'acheteur' => $achat->acheteur_nom ?? 'Non spécifié',
-                    ];
-                }
+            foreach ($bien->achats as $achat) {
+                $transactions[] = [
+                    'id'              => $achat->id,
+                    'type'            => 'vente',
+                    'bien_id'         => $bien->id,
+                    'bien_titre'      => $bien->titre,
+                    'bien_adresse'    => $bien->adresse,
+                    'bien_ville'      => $bien->ville,
+                    'montant'         => $bien->prix,
+                    'date'            => $achat->dateAchat ?? $achat->created_at,
+                    'partie_prenante' => trim(($achat->user->prenom ?? '') . ' ' . ($achat->user->nom ?? '')) ?: 'Non spécifié',
+                    'email'           => $achat->user->email ?? null,
+                    'tel'             => $achat->user->tel   ?? null,
+                ];
             }
 
             // Transactions de location
-            if ($bien->bienEnLocation && $bien->bienEnLocation->locations) {
-                foreach ($bien->bienEnLocation->locations as $location) {
-                    $transactions[] = [
-                        'id' => $location->id,
-                        'type' => 'location',
-                        'bien_titre' => $bien->titre,
-                        'montant' => $location->montant,
-                        'date' => $location->created_at,
-                        'locataire' => $location->locataire_nom ?? 'Non spécifié',
-                    ];
-                }
+            foreach ($bien->locations as $location) {
+                $transactions[] = [
+                    'id'              => $location->id,
+                    'type'            => 'location',
+                    'bien_id'         => $bien->id,
+                    'bien_titre'      => $bien->titre,
+                    'bien_adresse'    => $bien->adresse,
+                    'bien_ville'      => $bien->ville,
+                    'montant'         => $bien->prix,
+                    'date'            => $location->dateLocation ?? $location->created_at,
+                    'partie_prenante' => trim(($location->user->prenom ?? '') . ' ' . ($location->user->nom ?? '')) ?: 'Non spécifié',
+                    'email'           => $location->user->email ?? null,
+                    'tel'             => $location->user->tel   ?? null,
+                ];
             }
         }
 

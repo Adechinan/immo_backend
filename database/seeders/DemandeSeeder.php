@@ -14,7 +14,7 @@ class DemandeSeeder extends Seeder
      */
     public function run(): void
     {
-        $biens = Bien::where('statut', 'disponible')->get();
+        $biens = Bien::disponible()->get();
         $users = User::where('type', '!=', 'admin')->get();
 
         foreach ($biens as $bien) {

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Bien;
+use App\Models\Statut;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -34,7 +35,7 @@ class BienFactory extends Factory
             'adresse' => fake()->streetAddress(),
             'ville' => fake()->city(),
             'codePostal' => fake()->postcode(),
-            'statut' => fake()->randomElement(['disponible', 'vendu', 'loue', 'reserve']),
+            'statut_id' => Statut::query()->inRandomOrder()->value('id'),
             'prix' => fake()->numberBetween(50000, 1000000),
         ];
     }

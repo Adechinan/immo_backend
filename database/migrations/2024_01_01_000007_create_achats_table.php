@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('achats', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('bien_en_vente_id')->constrained('biens_en_vente')->onDelete('cascade');
+            $table->foreignId('bien_id')->constrained('biens')->onDelete('cascade');
             $table->date('dateAchat');
             $table->timestamps();
         });

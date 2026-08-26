@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "kreait/firebase-php": "^8.4",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.8",
@@ -32,6 +33,9 @@
         }
     },
     "scripts": {
+        "serve": [
+            "@php artisan serve --port=8010"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

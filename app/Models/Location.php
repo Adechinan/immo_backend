@@ -9,12 +9,13 @@ class Location extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'bien_en_location_id', 'dateLocation'];
+    protected $fillable = ['user_id', 'bien_id', 'dateLocation', 'jour_encaissement', 'date_fin', 'nom_manuel', 'email_manuel', 'tel_manuel'];
 
     protected function casts(): array
     {
         return [
             'dateLocation' => 'date',
+            'date_fin'     => 'date',
         ];
     }
 
@@ -23,9 +24,9 @@ class Location extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function bienEnLocation()
+    public function bien()
     {
-        return $this->belongsTo(BiensEnLocation::class, 'bien_en_location_id');
+        return $this->belongsTo(Bien::class);
     }
 
     public function mensualites()

@@ -22,9 +22,31 @@ php artisan key:generate
 # Migrations
 php artisan migrate
 
-# Lancer le serveur
-php artisan serve
+# Lancer le serveur (port 8010 — doit matcher NUXT_PUBLIC_API_BASE du frontend)
+php artisan serve --port=8010
+# ou : composer serve
 ```
+
+---
+
+## 🔒 Certificats SSL manquants (PHP/Windows)
+
+Si un appel HTTPS sortant échoue avec `cURL error 60: SSL certificate ...
+unable to get local issuer certificate` (ex: connexion Google), c'est que
+PHP sur ce poste n'a pas de bundle de certificats racine configuré — ça
+affecte tous les appels HTTPS sortants (Google, FedaPay...), pas un
+endpoint en particulier. `AuthController::google()` contourne ça
+temporairement en local (`'verify' => !app()->isLocal()`), mais la vraie
+correction :
+
+1. Télécharger https://curl.se/ca/cacert.pem
+2. Trouver le php.ini utilisé : `php --ini`
+3. Y ajouter :
+   ```ini
+   curl.cainfo = "C:\chemin\vers\cacert.pem"
+   openssl.cafile = "C:\chemin\vers\cacert.pem"
+   ```
+4. Relancer `php artisan serve`
 
 ---
 
@@ -37,8 +59,7 @@ php artisan serve
 | `tofs`             | Photos liées à un bien                    |
 | `options`          | Options disponibles (piscine, parking…)   |
 | `bien_option`      | Pivot Bien ↔ Options                      |
-| `biens_en_vente`   | Biens disponibles à la vente              |
-| `biens_en_location`| Biens disponibles à la location           |
+| `statuts`          | Statuts d'un bien (à vendre, à louer, vendu, loué, réservé) et leur couleur |
 | `achats`           | Transactions d'achat                      |
 | `locations`        | Contrats de location                      |
 | `mensualites`      | Paiements mensuels d'une location         |

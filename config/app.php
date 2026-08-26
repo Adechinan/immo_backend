@@ -61,6 +61,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | URL du frontend web (immo_frontend)
+    |--------------------------------------------------------------------------
+    |
+    | Utilisée pour construire le lien de réinitialisation de mot de passe
+    | envoyé par email (cf. AppServiceProvider::boot) — ce lien pointe vers
+    | une page du frontend Nuxt, pas vers cette API. Le mobile n'a pas de
+    | deep-link dédié : l'utilisateur termine la réinitialisation dans son
+    | navigateur, comme la plupart des apps mobiles.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

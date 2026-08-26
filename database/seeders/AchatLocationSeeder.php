@@ -4,13 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Achat;
 use App\Models\Bien;
-use App\Models\BiensEnVente;
-use App\Models\BiensEnLocation;
 use App\Models\Location;
 use App\Models\Mensualite;
+use App\Models\Statut;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class AchatLocationSeeder extends Seeder
 {
@@ -20,39 +18,33 @@ class AchatLocationSeeder extends Seeder
     public function run(): void
     {
         $users = User::where('type', '!=', 'admin')->get();
-        
-        // Créer quelques achats
-        $biensEnVente = Bien::all()->take(2);
-        foreach ($biensEnVente as $bien) {
+
+        // Créer quelques achats sur des biens à vendre
+        $biensAVendre = Bien::whereHas('statut', fn ($q) => $q->where('code', 'a_vendre'))->take(2)->get();
+        foreach ($biensAVendre as $bien) {
             $user = $users->random();
-            
-            // Créer l'entrée BiensEnVente si elle n'existe pas
-            $bienEnVente = $bien->bienEnVente ?? $bien->bienEnVente()->create();
-            
+
             $achat = Achat::create([
                 'user_id' => $user->id,
-                'bien_en_vente_id' => $bienEnVente->id,
+                'bien_id' => $bien->id,
                 'dateAchat' => now()->subDays(rand(10, 60)),
             ]);
-            
+
             // Marquer le bien comme vendu
-            $bien->update(['statut' => 'vendu']);
+            $bien->update(['statut_id' => Statut::where('code', 'vendu')->value('id')]);
         }
-        
-        // Créer quelques locations
-        $biensEnLocation = Bien::all()->take(2);
-        foreach ($biensEnLocation as $bien) {
+
+        // Créer quelques locations sur des biens à louer
+        $biensALouer = Bien::whereHas('statut', fn ($q) => $q->where('code', 'a_louer'))->take(2)->get();
+        foreach ($biensALouer as $bien) {
             $user = $users->random();
-            
-            // Créer l'entrée BiensEnLocation si elle n'existe pas
-            $bienEnLocation = $bien->bienEnLocation ?? $bien->bienEnLocation()->create();
-            
+
             $location = Location::create([
                 'user_id' => $user->id,
-                'bien_en_location_id' => $bienEnLocation->id,
+                'bien_id' => $bien->id,
                 'dateLocation' => now()->subMonths(rand(1, 6)),
             ]);
-            
+
             // Créer quelques mensualités payées
             for ($i = 1; $i <= 3; $i++) {
                 Mensualite::create([
@@ -61,9 +53,9 @@ class AchatLocationSeeder extends Seeder
                     'dateLoyer' => $bien->prix,
                 ]);
             }
-            
+
             // Marquer le bien comme loué
-            $bien->update(['statut' => 'loue']);
+            $bien->update(['statut_id' => Statut::where('code', 'loue')->value('id')]);
         }
     }
 }

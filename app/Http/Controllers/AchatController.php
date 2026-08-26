@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AchatRequest;
 use App\Http\Resources\AchatResource;
 use App\Models\Achat;
-use App\Models\BiensEnVente;
+use App\Models\Bien;
+use App\Models\Statut;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class AchatController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $achats = Achat::with(['user', 'bienEnVente.bien'])
+        $achats = Achat::with(['user', 'bien.statut'])
             ->when($request->user()->type !== 'admin', fn($q) => $q->where('user_id', $request->user()->id))
             ->paginate($request->get('per_page', 15));
 
@@ -29,25 +30,25 @@ class AchatController extends Controller
 
     public function store(AchatRequest $request): JsonResponse
     {
-        $bienEnVente = BiensEnVente::findOrFail($request->bien_en_vente_id);
+        $bien = Bien::with('statut')->findOrFail($request->bien_id);
 
-        // Vérifier que le bien est disponible
-        if ($bienEnVente->bien->statut !== 'disponible') {
+        // Vérifier que le bien est disponible à la vente
+        if ($bien->statut->code !== 'a_vendre') {
             return response()->json(['message' => 'Ce bien n\'est plus disponible.'], 422);
         }
 
         $achat = Achat::create([
-            'user_id'          => $request->user()->id,
-            'bien_en_vente_id' => $request->bien_en_vente_id,
-            'dateAchat'        => $request->dateAchat ?? now()->toDateString(),
+            'user_id'   => $request->user()->id,
+            'bien_id'   => $request->bien_id,
+            'dateAchat' => $request->dateAchat ?? now()->toDateString(),
         ]);
 
         // Mettre à jour le statut du bien
-        $bienEnVente->bien->update(['statut' => 'vendu']);
+        $bien->update(['statut_id' => Statut::where('code', 'vendu')->value('id')]);
 
         return response()->json([
             'message' => 'Achat enregistré avec succès.',
-            'data'    => new AchatResource($achat->load(['user', 'bienEnVente.bien'])),
+            'data'    => new AchatResource($achat->load(['user', 'bien.statut'])),
         ], 201);
     }
 
@@ -55,7 +56,7 @@ class AchatController extends Controller
     {
         $this->authorize('view', $achat);
 
-        return response()->json(['data' => new AchatResource($achat->load(['user', 'bienEnVente.bien']))]);
+        return response()->json(['data' => new AchatResource($achat->load(['user', 'bien.statut']))]);
     }
 
     public function destroy(Achat $achat): JsonResponse

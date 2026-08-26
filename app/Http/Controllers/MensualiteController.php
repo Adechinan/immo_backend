@@ -22,7 +22,18 @@ class MensualiteController extends Controller
 
     public function store(MensualiteRequest $request, Location $location): JsonResponse
     {
-        $this->authorize('update', $location);
+        $this->authorize('recordPayment', $location);
+
+        // Rempart serveur (en plus du check côté écran de paiement, cf.
+        // BienController::paiementInfo) : un propriétaire sans abonnement
+        // actif ou sans clé FedaPay ne doit pas pouvoir se retrouver avec un
+        // paiement enregistré alors qu'il n'a nulle part où le recevoir.
+        $proprietaire = $location->loadMissing('bien.user')->bien?->user;
+        if (! $proprietaire || ! $proprietaire->peutRecevoirPaiement()) {
+            return response()->json([
+                'message' => "Le propriétaire de ce bien n'a pas activé la réception de paiement pour le moment.",
+            ], 403);
+        }
 
         $mensualite = $location->mensualites()->create($request->validated());
 

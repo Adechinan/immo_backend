@@ -11,8 +11,8 @@ class AchatRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'bien_en_vente_id' => 'required|integer|exists:biens_en_vente,id',
-            'dateAchat'        => 'nullable|date',
+            'bien_id'   => 'required|integer|exists:biens,id',
+            'dateAchat' => 'nullable|date',
         ];
     }
 }

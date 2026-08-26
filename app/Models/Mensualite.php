@@ -9,7 +9,7 @@ class Mensualite extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['location_id', 'datePaiement', 'dateLoyer'];
+    protected $fillable = ['location_id', 'datePaiement', 'dateLoyer', 'mode_paiement'];
 
     protected function casts(): array
     {

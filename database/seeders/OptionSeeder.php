@@ -13,16 +13,23 @@ class OptionSeeder extends Seeder
      */
     public function run(): void
     {
+        // Équipements courants sur le marché immobilier béninois (Cotonou,
+        // Abomey-Calavi...) — "Groupe électrogène" et "Forage" remplacent des
+        // équivalents peu pertinents localement (chauffage, cave) : le climat
+        // tropical ne demande pas de chauffage, et la nappe phréatique proche
+        // de la surface rend les caves rares, alors que délestages électriques
+        // et coupures d'eau rendent groupe électrogène et forage très
+        // recherchés dans les annonces.
         $options = [
             ['name' => 'Piscine'],
             ['name' => 'Parking'],
             ['name' => 'Jardin'],
             ['name' => 'Terrasse'],
-            ['name' => 'Cave'],
+            ['name' => 'Cour clôturée'],
             ['name' => 'Ascenseur'],
             ['name' => 'Climatisation'],
-            ['name' => 'Chauffage'],
-            ['name' => 'Interphone'],
+            ['name' => 'Groupe électrogène'],
+            ['name' => 'Forage'],
             ['name' => 'Gardien'],
         ];
 

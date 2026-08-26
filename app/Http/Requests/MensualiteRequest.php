@@ -11,8 +11,9 @@ class MensualiteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'datePaiement' => 'required|date',
-            'dateLoyer'    => 'required|numeric|min:0',
+            'datePaiement'  => 'required|date',
+            'dateLoyer'     => 'required|numeric|min:0',
+            'mode_paiement' => 'nullable|string|max:50',
         ];
     }
 }

@@ -11,15 +11,19 @@ class Bien extends Model
 
     protected $fillable = [
         'titre',
+        'categorie',
         'surface',
         'description',
         'pieces',
         'chambres',
+        'salons',
         'etage',
         'adresse',
         'ville',
         'codePostal',
-        'statut',
+        'latitude',
+        'longitude',
+        'statut_id',
         'prix',
         'user_id',
     ];
@@ -27,8 +31,10 @@ class Bien extends Model
     protected function casts(): array
     {
         return [
-            'surface' => 'decimal:2',
-            'prix'    => 'decimal:2',
+            'surface'   => 'decimal:2',
+            'prix'      => 'decimal:2',
+            'latitude'  => 'decimal:7',
+            'longitude' => 'decimal:7',
         ];
     }
 
@@ -48,14 +54,19 @@ class Bien extends Model
         return $this->belongsToMany(Option::class, 'bien_option');
     }
 
-    public function bienEnVente()
+    public function statut()
     {
-        return $this->hasOne(BiensEnVente::class);
+        return $this->belongsTo(Statut::class);
     }
 
-    public function bienEnLocation()
+    public function achats()
     {
-        return $this->hasOne(BiensEnLocation::class);
+        return $this->hasMany(Achat::class);
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(Location::class);
     }
 
     public function demandes()
@@ -64,19 +75,24 @@ class Bien extends Model
     }
 
     // Scopes
+    public function scopeStatutCode($query, string|array $code)
+    {
+        return $query->whereHas('statut', fn ($q) => $q->whereIn('code', (array) $code));
+    }
+
     public function scopeDisponible($query)
     {
-        return $query->where('statut', 'disponible');
+        return $query->statutCode(['a_vendre', 'a_louer']);
     }
 
     public function scopeEnVente($query)
     {
-        return $query->whereHas('bienEnVente');
+        return $query->statutCode(['a_vendre', 'vendu']);
     }
 
     public function scopeEnLocation($query)
     {
-        return $query->whereHas('bienEnLocation');
+        return $query->statutCode(['a_louer', 'loue']);
     }
 
     public function scopeVille($query, string $ville)
